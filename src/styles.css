@@ -278,9 +278,6 @@ h2 { font-family: var(--f-display); font-weight: 500; font-size: clamp(1.8rem, 4
 .motion .statement .w { opacity: 0.15; }
 .motion #services { position: relative; isolation: isolate; }
 .motion #services::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--navy-deep); border-radius: clamp(28px, 5vw, 64px); transform: scaleX(var(--sc, 1)); }
-/* строка проекта в центре экрана остаётся яркой, остальные притухают */
-.work-year, .work-title, .work-tags { transition: color 0.3s, transform 0.5s var(--ease-out), opacity 0.45s var(--ease-out); }
-.motion .list:has(.work.active) .work:not(.active):not(:hover):not([data-open]) :is(.work-year, .work-title, .work-tags) { opacity: 0.3; }
 
 /* «Опыт»: вертикальная линия между датой и текстом растёт вдоль списка */
 .exp { position: relative; }

@@ -137,12 +137,17 @@ export function initMotion({ reduce, fine, root }) {
   (() => {
     const words = $$('#statement .w');
     if (!words.length) return;
+    // Слова загораются строго по одному, в порядке чтения: на каждое слово отведён свой отрезок прокрутки,
+    // поэтому одновременно «горит» не больше одного слова, все предыдущие уже яркие, все следующие тусклые.
+    const n = words.length;
+    const NOTE = 6;                                   // длина появления подписи под абзацем, в тех же долях
+    const px = () => Math.max(innerHeight * 1.2, (n + NOTE) * 44);   // ~44 px прокрутки на слово
     gsap.timeline({
       defaults: { ease: 'none' },
-      scrollTrigger: { trigger: '#about', start: 'top top', end: '+=140%', pin: true, scrub: 0.6 },
+      scrollTrigger: { trigger: '#about', start: 'top top', end: () => '+=' + px(), pin: true, scrub: 0.35, invalidateOnRefresh: true },
     })
-      .to(words, { opacity: 1, stagger: 0.5, duration: 1 }, 0)
-      .fromTo('.about-note', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 4 }, '>-2');
+      .to(words, { opacity: 1, duration: 1, stagger: 1 }, 0)
+      .fromTo('.about-note', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: NOTE }, '>');
   })();
 
   /* ---------- «Услуги»: тёмная панель разворачивается на всю ширину ---------- */
@@ -157,14 +162,6 @@ export function initMotion({ reduce, fine, root }) {
     gsap.fromTo(row, { xPercent: dir === -1 ? 0 : -38 }, {
       xPercent: dir === -1 ? -38 : 0, ease: 'none',
       scrollTrigger: { trigger: '.band', start: 'top bottom', end: 'bottom top', scrub: 0.8 },
-    });
-  });
-
-  /* ---------- проекты: строка в центре экрана яркая, остальные притухают ---------- */
-  $$('.work').forEach((row) => {
-    ScrollTrigger.create({
-      trigger: row, start: 'top 62%', end: 'bottom 38%',
-      onToggle: (self) => row.classList.toggle('active', self.isActive),
     });
   });
 
