@@ -119,6 +119,7 @@ const preview = (() => {
   if (!fine || reduce) return noop;
 
   const el = $('#preview');
+  if (!el) return noop;           // блока проектов нет, превью не нужно
   const arts = $$('.art', el);
   let x = 0, y = 0, tx = 0, ty = 0, active = false, raf = 0;
 

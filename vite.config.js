@@ -29,11 +29,18 @@ const loadContent = () => {
 
 const fill = (tpl, ctx) => tpl.replace(/\{\{(\w+)\}\}/g, (m, key) => (key in ctx ? esc(ctx[key]) : m));
 
-// {{поле}} подставляет значение, {{#each список}}...{{/each}} повторяет блок, внутри доступны {{n}} (с 1) и {{art}} (1..5)
+const filled = (v) => (Array.isArray(v) ? v.length > 0 : Boolean(v));
+
+// {{поле}} подставляет значение, {{#each список}}...{{/each}} повторяет блок, внутри доступны {{n}} (с 1) и {{art}} (1..5),
+// {{#if поле}}...{{/if}} оставляет блок, только если поле не пустое (непустая строка или непустой список),
+// {{#unless поле}}...{{/unless}} наоборот, оставляет блок, если поле пустое
 function render(html, data) {
   const ctx = { ...data, year: new Date().getFullYear() };
   const out = fill(
-    html.replace(/\{\{#each (\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g, (_, key, body) => {
+    html
+    .replace(/\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (_, key, body) => (filled(data[key]) ? body : ''))
+    .replace(/\{\{#unless (\w+)\}\}([\s\S]*?)\{\{\/unless\}\}/g, (_, key, body) => (filled(data[key]) ? '' : body))
+    .replace(/\{\{#each (\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g, (_, key, body) => {
       if (!Array.isArray(data[key])) throw new Error(`В content.json нет списка «${key}»`);
       return data[key].map((item, i) => fill(body, { ...ctx, ...item, n: i + 1, art: (i % 5) + 1 })).join('');
     }),

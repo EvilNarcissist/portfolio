@@ -40,10 +40,10 @@
     <div class="wrap nav-row">
       <a class="logo" href="#top" aria-label="{{name}}, в начало страницы">{{logo}}</a>
       <nav class="links" aria-label="Разделы">
-        <a href="#works">Работы</a>
+        {{#if projects}}<a href="#works">Работы</a>{{/if}}
         <a href="#about">Обо мне</a>
         <a href="#services">Услуги</a>
-        <a href="#experience">Опыт</a>
+        {{#if experience}}<a href="#experience">Опыт</a>{{/if}}
         <a href="#contact">Контакты</a>
       </nav>
       <p class="status"><span class="dot" aria-hidden="true"></span>{{status}}</p>
@@ -55,10 +55,10 @@
 
   <div class="menu" id="menu" hidden>
     <nav aria-label="Разделы">
-      <a href="#works">Работы</a>
+      {{#if projects}}<a href="#works">Работы</a>{{/if}}
       <a href="#about">Обо мне</a>
       <a href="#services">Услуги</a>
-      <a href="#experience">Опыт</a>
+      {{#if experience}}<a href="#experience">Опыт</a>{{/if}}
       <a href="#contact">Контакты</a>
     </nav>
   </div>
@@ -74,8 +74,9 @@
         <div class="hero-bottom">
           <p class="lede rise" style="--d:.55s">{{lede}}</p>
           <div class="cta-row rise" style="--d:.7s">
-            <a class="btn" href="#works">Смотреть работы</a>
-            <a class="textlink" href="#contact">Написать мне</a>
+            {{#if projects}}<a class="btn" href="#works">Смотреть работы</a>
+            <a class="textlink" href="#contact">Написать мне</a>{{/if}}
+            {{#unless projects}}<a class="btn" href="#contact">Написать мне</a>{{/unless}}
           </div>
         </div>
       </div>
@@ -88,6 +89,7 @@
       </div>
     </div>
 
+    {{#if projects}}
     <section class="sec" id="works" aria-labelledby="works-h">
       <div class="wrap">
         <h2 id="works-h">Работы</h2>
@@ -113,12 +115,13 @@
         </div>
       </div>
     </section>
+    {{/if}}
 
     <section class="sec sec-about" id="about" aria-labelledby="about-h">
       <div class="wrap">
         <h2 class="sr" id="about-h">Обо мне</h2>
         <p class="statement" id="statement">{{statement}}</p>
-        <p class="about-note">{{aboutNote}}</p>
+        {{#if aboutNote}}<p class="about-note">{{aboutNote}}</p>{{/if}}
       </div>
     </section>
 
@@ -146,6 +149,7 @@
       </div>
     </section>
 
+    {{#if experience}}
     <section class="sec" id="experience" aria-labelledby="exp-h">
       <div class="wrap split">
         <h2 id="exp-h">Опыт</h2>
@@ -156,6 +160,7 @@
         </ol>
       </div>
     </section>
+    {{/if}}
   </main>
 
   <footer class="contact" id="contact">
@@ -176,9 +181,11 @@
     </div>
   </footer>
 
+  {{#if projects}}
   <div class="preview" id="preview" aria-hidden="true">
     {{#each projects}}<div class="art a{{art}}"></div>{{/each}}
   </div>
+  {{/if}}
 
   <script type="module" src="/src/main.js"></script>
 </body>

@@ -140,14 +140,15 @@ export function initMotion({ reduce, fine, root }) {
     // Слова загораются строго по одному, в порядке чтения: на каждое слово отведён свой отрезок прокрутки,
     // поэтому одновременно «горит» не больше одного слова, все предыдущие уже яркие, все следующие тусклые.
     const n = words.length;
-    const NOTE = 6;                                   // длина появления подписи под абзацем, в тех же долях
+    const note = $('.about-note');
+    const NOTE = note ? 6 : 0;                        // длина появления подписи под абзацем, в тех же долях (подписи может не быть)
     const px = () => Math.max(innerHeight * 1.2, (n + NOTE) * 44);   // ~44 px прокрутки на слово
-    gsap.timeline({
+    const tl = gsap.timeline({
       defaults: { ease: 'none' },
       scrollTrigger: { trigger: '#about', start: 'top top', end: () => '+=' + px(), pin: true, scrub: 0.35, invalidateOnRefresh: true },
     })
-      .to(words, { opacity: 1, duration: 1, stagger: 1 }, 0)
-      .fromTo('.about-note', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: NOTE }, '>');
+      .to(words, { opacity: 1, duration: 1, stagger: 1 }, 0);
+    if (note) tl.fromTo(note, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: NOTE }, '>');
   })();
 
   /* ---------- «Услуги»: тёмная панель разворачивается на всю ширину ---------- */
@@ -221,10 +222,12 @@ export function initMotion({ reduce, fine, root }) {
   reveal('.mail, .foot', { y: 24, start: 'top 98%' });
 
   /* ---------- «Опыт»: линия растёт вдоль списка, годы набегают ---------- */
-  gsap.fromTo('.exp', { '--grow': 0 }, {
-    '--grow': 1, ease: 'none',
-    scrollTrigger: { trigger: '.exp', start: 'top 80%', end: 'bottom 60%', scrub: true },
-  });
+  if ($('.exp')) {
+    gsap.fromTo('.exp', { '--grow': 0 }, {
+      '--grow': 1, ease: 'none',
+      scrollTrigger: { trigger: '.exp', start: 'top 80%', end: 'bottom 60%', scrub: true },
+    });
+  }
   $$('.exp-date').forEach((el) => {
     const text = el.textContent;
     if (!/\d{4}/.test(text)) return;
@@ -259,7 +262,7 @@ export function initMotion({ reduce, fine, root }) {
     // «Контакты» не притягиваем: страница должна свободно доходить до самого низа
     const anchors = [
       ['#works', 'top 88px'], ['#services', 'top 70px'],
-    ].map(([sel, start]) => ScrollTrigger.create({ trigger: sel, start }));
+    ].filter(([sel]) => $(sel)).map(([sel, start]) => ScrollTrigger.create({ trigger: sel, start }));   // только те блоки, что есть на странице
     let removers = [];
     const build = () => {
       removers.forEach((r) => r());
