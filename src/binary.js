@@ -73,8 +73,25 @@ export function createRain(canvas, options = {}) {
     raf = requestAnimationFrame(frame);
   };
 
+  /*
+    Размер холста измеряется при старте, но при обновлении страницы (особенно из кэша) скрипт может
+    выполниться раньше, чем применятся стили: холст тогда имеет размер по умолчанию 300×150,
+    а потом растягивается на весь экран, и цифры получаются огромными.
+    Поэтому следим за реальным размером холста и пересоздаём картинку, как только он изменится.
+  */
+  let observer = null;
+  const watch = () => {
+    if (observer || !('ResizeObserver' in window)) return;
+    observer = new ResizeObserver(() => {
+      if (!running) return;
+      const r = canvas.getBoundingClientRect();
+      if (Math.abs(r.width - w) > 0.5 || Math.abs(r.height - h) > 0.5) resize();
+    });
+    observer.observe(canvas);
+  };
+
   return {
-    start() { if (running) return; running = true; resize(); raf = requestAnimationFrame(frame); },
+    start() { if (running) return; running = true; resize(); watch(); raf = requestAnimationFrame(frame); },
     stop() { running = false; cancelAnimationFrame(raf); },
     resize,
     clear() { ctx.clearRect(0, 0, w, h); },
