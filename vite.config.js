@@ -22,7 +22,14 @@ const loadContent = () => {
   const file = contentFile();
   let data;
   try {
-    data = JSON.parse(readFileSync(file, 'utf8'));
+    const raw = readFileSync(file, 'utf8');
+    // Если русский текст при копировании прошёл через неверную кодировку, в нём появляются математические
+    // знаки (∞ ≤ ≥ и т. п.) и символ-заместитель. В настоящих текстах их нет, поэтому лучше остановить
+    // сборку, чем опубликовать сайт с «кракозябрами».
+    if (/[∀-⋿�]/.test(raw)) {
+      throw new Error('в тексте есть символы, которых не бывает в обычных текстах: вероятно, сломана кодировка. Скопируйте файл заново: LC_ALL=en_US.UTF-8 pbcopy < content.json');
+    }
+    data = JSON.parse(raw);
   } catch (e) {
     throw new Error(`Не удалось прочитать ${file}: ${e.message}`);
   }
