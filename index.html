@@ -21,7 +21,8 @@
       if (matchMedia("(prefers-reduced-motion: reduce)").matches) { d.classList.add("no-loader"); return; }
       d.classList.add("loading");
       // запасной выход: если скрипт сайта не загрузился, страница всё равно откроется
-      setTimeout(function () { d.classList.remove("loading"); }, 5000);
+      // (если загрузился, но поздно, он сам доведёт загрузку до конца, обрывать её нельзя)
+      setTimeout(function () { if (!d.classList.contains("booted")) d.classList.remove("loading"); }, 5000);
     })();
   </script>
 </head>

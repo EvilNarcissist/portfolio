@@ -70,8 +70,17 @@ export function initMotion({ reduce, fine, root, model }) {
   // пока идёт загрузка, страница не листается
   const loading = root.classList.contains('loading');
   if (loading) lenis.stop();
-  const ready = () => { lenis.start(); ScrollTrigger.refresh(); };
+  // Ссылка с якорем (…/#contact): браузер прыгает к блоку ещё до того, как закреплённые секции
+  // изменят высоту страницы, и в итоге оказывается не там. Поэтому после расчёта едем к блоку сами.
+  const toHash = () => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    const target = id && id !== 'top' ? document.getElementById(id) : null;
+    if (target) lenis.scrollTo(id === 'experience' && expPin ? expPin.start : target, { immediate: true, force: true });
+  };
+  const ready = () => { lenis.start(); ScrollTrigger.refresh(); toHash(); };
   if (loading) document.addEventListener('site:ready', ready, { once: true });
+  else requestAnimationFrame(() => { ScrollTrigger.refresh(); toHash(); });
+  addEventListener('hashchange', toHash);   // якорь поменяли в адресной строке или кнопкой «назад»
 
   const easeOutQuart = (t) => 1 - Math.pow(1 - t, 4);
   let expPin = null;   // закрепление блока «Опыт», нужно ссылке меню и притяжению
@@ -93,6 +102,11 @@ export function initMotion({ reduce, fine, root, model }) {
     // «Опыт» закреплён на экране, поэтому едем туда, где он виден целиком
     to(hash === '#experience' && expPin ? expPin.start : target);
     history.replaceState(null, '', hash);
+    // «Перейти к содержимому»: клавиатурный фокус должен уйти в содержимое, иначе ссылка бесполезна
+    if (a.classList.contains('skip') && target) {
+      target.setAttribute('tabindex', '-1');
+      target.focus({ preventScroll: true });
+    }
   });
 
   /* ---------- индикатор прокрутки ---------- */
@@ -102,9 +116,12 @@ export function initMotion({ reduce, fine, root, model }) {
   });
 
   /* ---------- шапка прячется вниз и возвращается вверх ---------- */
+  // пока в шапке клавиатурный фокус, она не прячется: иначе фокус оказывается на невидимой ссылке
+  const navFocused = () => nav.contains(document.activeElement) && document.activeElement.matches(':focus-visible');
+  nav.addEventListener('focusin', () => { if (navFocused()) nav.classList.remove('hide'); });
   lenis.on('scroll', ({ direction, scroll }) => {
     if (!menu.hidden) return;
-    if (direction === 1 && scroll > 260) nav.classList.add('hide');
+    if (direction === 1 && scroll > 260 && !navFocused()) nav.classList.add('hide');
     else if (direction === -1 || scroll <= 260) nav.classList.remove('hide');
   });
 

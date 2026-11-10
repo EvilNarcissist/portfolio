@@ -14,6 +14,7 @@ const root = document.documentElement;
 (() => {
   const loader = $('#loader');
   if (!root.classList.contains('loading')) return;
+  root.classList.add('booted');   // скрипт загрузился: запасной таймер в index.html больше не должен обрывать загрузку
 
   const num = $('#loaderNum');
   const bar = $('#loaderBar');

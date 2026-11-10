@@ -20,11 +20,19 @@ const contentFile = () => {
 
 const loadContent = () => {
   const file = contentFile();
+  let data;
   try {
-    return JSON.parse(readFileSync(file, 'utf8'));
+    data = JSON.parse(readFileSync(file, 'utf8'));
   } catch (e) {
     throw new Error(`Не удалось прочитать ${file}: ${e.message}`);
   }
+  // Значения экранируются при подстановке, но ссылка вида javascript:… осталась бы рабочей.
+  // Поэтому в ссылки пускаем только обычные адреса, а email проверяем на форму.
+  for (const s of data.socials || []) {
+    if (!/^(#$|https?:\/\/)/i.test(String(s.url))) throw new Error(`content.json: недопустимая ссылка «${s.url}» у «${s.label}» (нужен адрес, начинающийся с https://)`);
+  }
+  if (!/^[^\s@<>"'&]+@[^\s@<>"'&]+\.[^\s@<>"'&]+$/.test(String(data.email))) throw new Error('content.json: поле email не похоже на адрес почты');
+  return data;
 };
 
 const fill = (tpl, ctx) => tpl.replace(/\{\{(\w+)\}\}/g, (m, key) => (key in ctx ? esc(ctx[key]) : m));
