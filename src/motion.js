@@ -40,7 +40,7 @@ function splitMask(el) {
   return inner;
 }
 
-export function initMotion({ reduce, fine, root }) {
+export function initMotion({ reduce, fine, root, model }) {
   const nav = $('#nav');
   const menu = $('#menu');
 
@@ -303,6 +303,38 @@ export function initMotion({ reduce, fine, root }) {
     });
   })();
 
+  /* ---------- 3D-модель в «Услугах»: вращается от прокрутки, по инерции докручивается ---------- */
+  let showShape;
+  if (model) {
+    const st = { p: 0 };
+    gsap.to(st, {
+      p: 1, ease: 'none',
+      scrollTrigger: { trigger: '#services', start: 'top bottom', end: 'bottom top', scrub: 0.6 },
+    });
+    let visible = false, spin = 0, drift = 0;
+    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }).observe(model.canvas);
+    gsap.ticker.add((_, dt) => {
+      if (!visible) return;
+      spin += lenis.velocity * 0.0022;     // свайп раскручивает модель, вверх — в обратную сторону
+      drift += dt * 0.00009;               // едва заметное собственное вращение
+      model.state.ry = 0.6 + st.p * Math.PI * 1.6 + spin + drift;
+      model.state.rx = -0.75 + st.p * 1.1 + Math.sin(drift * 4) * 0.06;
+      model.render();
+    });
+    // смена фигуры: старая сжимается, новая «выпрыгивает»
+    showShape = (i) => {
+      if (((i % model.count) + model.count) % model.count === model.state.shape) return;
+      gsap.killTweensOf(model.state);
+      gsap.to(model.state, {
+        zoom: 0, duration: 0.22, ease: 'power2.in',
+        onComplete() {
+          model.setShape(i, false);
+          gsap.to(model.state, { zoom: 1, duration: 0.75, ease: 'back.out(1.7)' });
+        },
+      });
+    };
+  }
+
   /* ---------- списки наклоняются по скорости скролла ---------- */
   (() => {
     const els = $$('.list, .stack, .exp');
@@ -337,5 +369,6 @@ export function initMotion({ reduce, fine, root }) {
     stop: () => lenis.stop(),
     start: () => lenis.start(),
     to,
+    showShape,
   };
 }

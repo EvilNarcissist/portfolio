@@ -279,6 +279,12 @@ h2 { font-family: var(--f-display); font-weight: 500; font-size: clamp(1.8rem, 4
 .motion #services { position: relative; isolation: isolate; }
 .motion #services::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--navy-deep); border-radius: clamp(28px, 5vw, 64px); transform: scaleX(var(--sc, 1)); }
 
+/* «Услуги»: под заголовком каркасная 3D-модель, вращается от прокрутки */
+.svc-side { display: grid; gap: clamp(16px, 3vw, 40px); align-content: start; justify-items: start; }
+.model { display: block; width: min(100%, 340px); aspect-ratio: 1; }
+@media (min-width: 901px) { .svc-side { position: sticky; top: 112px; } }
+@media (max-width: 900px) { .model { width: min(64%, 240px); } }
+
 /* «Опыт»: вертикальная линия между датой и текстом растёт вдоль списка */
 .exp { position: relative; }
 .exp::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(9.5rem + 12px); width: 1px; background: var(--steel); opacity: 0.5; transform: scaleY(var(--grow, 1)); transform-origin: top; }

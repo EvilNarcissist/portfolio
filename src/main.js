@@ -1,6 +1,7 @@
 import './styles.css';
 import { createRain } from './binary.js';
 import { initMotion } from './motion.js';
+import { createModel } from './models.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -53,6 +54,7 @@ const root = document.documentElement;
   addEventListener('keydown', finish, { once: true });
 })();
 
+const model = createModel($('#model'));   // каркасная 3D-модель в блоке услуг (без движения рисуется один раз)
 let motion = { stop() {}, start() {} };   // настоящий объект появляется в конце файла, когда вся разметка уже подготовлена
 
 /* ---------- двоичный дождь в hero и в контактах ---------- */
@@ -110,6 +112,11 @@ $$('[data-acc]').forEach((group) => {
       btn.setAttribute('aria-expanded', 'true');
     }
     preview.hide();
+    // у каждой услуги своя 3D-модель
+    if (open && model && group.classList.contains('stack')) {
+      const i = $$('.acc', group).indexOf(item);
+      if (motion.showShape) motion.showShape(i); else model.setShape(i);
+    }
   });
 });
 
@@ -250,4 +257,4 @@ const preview = (() => {
 })();
 
 /* ---------- движение при скролле (после подготовки всей разметки) ---------- */
-motion = initMotion({ reduce, fine, root });
+motion = initMotion({ reduce, fine, root, model });
