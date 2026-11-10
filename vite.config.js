@@ -31,6 +31,9 @@ const loadContent = () => {
   for (const s of data.socials || []) {
     if (!/^(#$|https?:\/\/)/i.test(String(s.url))) throw new Error(`content.json: недопустимая ссылка «${s.url}» у «${s.label}» (нужен адрес, начинающийся с https://)`);
   }
+  for (const p of data.projects || []) {
+    if (p.link && !/^https?:\/\//i.test(String(p.link))) throw new Error(`content.json: недопустимая ссылка «${p.link}» у проекта «${p.title}»`);
+  }
   if (!/^[^\s@<>"'&]+@[^\s@<>"'&]+\.[^\s@<>"'&]+$/.test(String(data.email))) throw new Error('content.json: поле email не похоже на адрес почты');
 
   // Слова для бегущей строки (marquee) и крупной ленты (band): чередуем сплошной и контурный стиль,
@@ -54,18 +57,21 @@ const filled = (v) => (Array.isArray(v) ? v.length > 0 : Boolean(v));
 // {{поле}} подставляет значение, {{#each список}}...{{/each}} повторяет блок, внутри доступны {{n}} (с 1) и {{art}} (1..5),
 // {{#if поле}}...{{/if}} оставляет блок, только если поле не пустое (непустая строка или непустой список),
 // {{#unless поле}}...{{/unless}} наоборот, оставляет блок, если поле пустое
+// условия считаются по тому контексту, где стоят: внутри {{#each}} по полям элемента, снаружи по полям верхнего уровня
+const cond = (s, c) => s
+  .replace(/\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (_, key, body) => (filled(c[key]) ? body : ''))
+  .replace(/\{\{#unless (\w+)\}\}([\s\S]*?)\{\{\/unless\}\}/g, (_, key, body) => (filled(c[key]) ? '' : body));
+
 function render(html, data) {
   const ctx = { ...data, year: new Date().getFullYear() };
-  const out = fill(
-    html
-    .replace(/\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (_, key, body) => (filled(data[key]) ? body : ''))
-    .replace(/\{\{#unless (\w+)\}\}([\s\S]*?)\{\{\/unless\}\}/g, (_, key, body) => (filled(data[key]) ? '' : body))
-    .replace(/\{\{#each (\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g, (_, key, body) => {
-      if (!Array.isArray(data[key])) throw new Error(`В content.json нет списка «${key}»`);
-      return data[key].map((item, i) => fill(body, { ...ctx, ...item, n: i + 1, art: (i % 5) + 1 })).join('');
-    }),
-    ctx,
-  );
+  const expanded = html.replace(/\{\{#each (\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g, (_, key, body) => {
+    if (!Array.isArray(data[key])) throw new Error(`В content.json нет списка «${key}»`);
+    return data[key].map((item, i) => {
+      const c = { ...ctx, ...item, n: i + 1, art: (i % 5) + 1 };
+      return fill(cond(body, c), c);
+    }).join('');
+  });
+  const out = fill(cond(expanded, ctx), ctx);
   const missing = out.match(/\{\{\w+\}\}/g);
   if (missing) throw new Error(`В content.json не хватает полей: ${[...new Set(missing)].join(', ')}`);
   return out;
