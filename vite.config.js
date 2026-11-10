@@ -32,6 +32,18 @@ const loadContent = () => {
     if (!/^(#$|https?:\/\/)/i.test(String(s.url))) throw new Error(`content.json: недопустимая ссылка «${s.url}» у «${s.label}» (нужен адрес, начинающийся с https://)`);
   }
   if (!/^[^\s@<>"'&]+@[^\s@<>"'&]+\.[^\s@<>"'&]+$/.test(String(data.email))) throw new Error('content.json: поле email не похоже на адрес почты');
+
+  // Слова для бегущей строки (marquee) и крупной ленты (band): чередуем сплошной и контурный стиль,
+  // список повторяем, пока он не станет достаточно длинным, чтобы заполнить ширину экрана.
+  const words = (list, name) => {
+    if (!Array.isArray(list) || list.length === 0) throw new Error(`content.json: нужен непустой список «${name}»`);
+    const long = [];
+    while (long.length < 6) long.push(...list);
+    return long.map((text, i) => ({ text, tag: i % 2 ? 'em' : 'b' }));
+  };
+  data.marqueeItems = words(data.marquee, 'marquee');
+  data.bandA = words(data.bandRow1, 'bandRow1');
+  data.bandB = words(data.bandRow2, 'bandRow2');
   return data;
 };
 

@@ -265,6 +265,9 @@ h2 { font-family: var(--f-display); font-weight: 500; font-size: clamp(1.8rem, 4
 .mw { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.18em; margin-bottom: -0.18em; }
 .mi { display: inline-block; will-change: transform; }
 
+/* слова в строке и ленте: сплошные <b> и контурные <em> одного веса */
+.track b, .band-row b { font-weight: inherit; }
+
 /* крупная лента: две строки едут навстречу друг другу, пока вы листаете */
 .band { overflow: hidden; padding-block: clamp(24px, 5vw, 72px); display: grid; gap: clamp(4px, 1vw, 12px); }
 .band-row { display: flex; width: max-content; will-change: transform; }

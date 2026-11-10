@@ -85,8 +85,8 @@
 
     <div class="marquee" aria-hidden="true">
       <div class="track">
-        <span>Продуктовый дизайн<i></i><em>Интерфейсы</em><i></i>Motion<i></i><em>Frontend</em><i></i>Айдентика<i></i><em>Прототипы</em><i></i></span>
-        <span>Продуктовый дизайн<i></i><em>Интерфейсы</em><i></i>Motion<i></i><em>Frontend</em><i></i>Айдентика<i></i><em>Прототипы</em><i></i></span>
+        <span>{{#each marqueeItems}}<{{tag}}>{{text}}</{{tag}}><i></i>{{/each}}</span>
+        <span>{{#each marqueeItems}}<{{tag}}>{{text}}</{{tag}}><i></i>{{/each}}</span>
       </div>
     </div>
 
@@ -127,8 +127,8 @@
     </section>
 
     <div class="band" aria-hidden="true">
-      <div class="band-row" data-dir="-1"><span>Дизайн<i></i><em>Motion</em><i></i>Код<i></i><em>Дизайн</em><i></i>Motion<i></i><em>Код</em><i></i></span></div>
-      <div class="band-row" data-dir="1"><span><em>Интерфейсы</em><i></i>Прототипы<i></i><em>Анимация</em><i></i>Интерфейсы<i></i><em>Прототипы</em><i></i>Анимация<i></i></span></div>
+      <div class="band-row" data-dir="-1"><span>{{#each bandA}}<{{tag}}>{{text}}</{{tag}}><i></i>{{/each}}</span></div>
+      <div class="band-row" data-dir="1"><span>{{#each bandB}}<{{tag}}>{{text}}</{{tag}}><i></i>{{/each}}</span></div>
     </div>
 
     <section class="sec" id="services" aria-labelledby="services-h">
