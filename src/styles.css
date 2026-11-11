@@ -282,6 +282,10 @@ h2 { font-family: var(--f-display); font-weight: 500; font-size: clamp(1.8rem, 4
 .motion #services { position: relative; isolation: isolate; }
 .motion #services::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--navy-deep); border-radius: clamp(28px, 5vw, 64px); transform: scaleX(var(--sc, 1)); }
 
+/* проект с роликом: видео вместо абстрактной картинки */
+.art-video { display: block; width: 100%; height: auto; background: #000; object-fit: cover; }
+.work-links { display: flex; flex-wrap: wrap; gap: 0 24px; }
+
 /* main получает фокус только программно (ссылка «Перейти к содержимому»), рамка вокруг всей страницы не нужна */
 main:focus { outline: none; }
 

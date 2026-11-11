@@ -39,7 +39,15 @@ const loadContent = () => {
     if (!/^(#$|https?:\/\/)/i.test(String(s.url))) throw new Error(`content.json: недопустимая ссылка «${s.url}» у «${s.label}» (нужен адрес, начинающийся с https://)`);
   }
   for (const p of data.projects || []) {
-    if (p.link && !/^https?:\/\//i.test(String(p.link))) throw new Error(`content.json: недопустимая ссылка «${p.link}» у проекта «${p.title}»`);
+    for (const key of ['link', 'link2']) {
+      if (p[key] && !/^https?:\/\//i.test(String(p[key]))) throw new Error(`content.json: недопустимая ссылка «${p[key]}» (${key}) у проекта «${p.title}»`);
+    }
+    // видео и постер лежат в public/media (путь /media/…) или по https-адресу
+    for (const key of ['video', 'poster']) {
+      if (p[key] && !/^(\/media\/[\w.-]+|https:\/\/)/.test(String(p[key]))) throw new Error(`content.json: «${key}» у проекта «${p.title}» должен быть вида /media/файл или https://…`);
+    }
+    // для превью-картинки при наведении нужен путь без начального «/», чтобы он работал и в подпапке (GitHub Pages)
+    p.posterRel = p.poster && p.poster.startsWith('/') ? p.poster.slice(1) : (p.poster || '');
   }
   if (!/^[^\s@<>"'&]+@[^\s@<>"'&]+\.[^\s@<>"'&]+$/.test(String(data.email))) throw new Error('content.json: поле email не похоже на адрес почты');
 
@@ -65,9 +73,18 @@ const filled = (v) => (Array.isArray(v) ? v.length > 0 : Boolean(v));
 // {{#if поле}}...{{/if}} оставляет блок, только если поле не пустое (непустая строка или непустой список),
 // {{#unless поле}}...{{/unless}} наоборот, оставляет блок, если поле пустое
 // условия считаются по тому контексту, где стоят: внутри {{#each}} по полям элемента, снаружи по полям верхнего уровня
-const cond = (s, c) => s
-  .replace(/\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (_, key, body) => (filled(c[key]) ? body : ''))
-  .replace(/\{\{#unless (\w+)\}\}([\s\S]*?)\{\{\/unless\}\}/g, (_, key, body) => (filled(c[key]) ? '' : body));
+// Условия могут быть вложенными: сначала раскрываются самые внутренние (тело без других {{#if}} / {{#unless}}), потом внешние.
+const cond = (s, c) => {
+  const inner = (name) => new RegExp(`\\{\\{#${name} (\\w+)\\}\\}((?:(?!\\{\\{#(?:if|unless) )[\\s\\S])*?)\\{\\{\\/${name}\\}\\}`, 'g');
+  let prev;
+  do {
+    prev = s;
+    s = s
+      .replace(inner('if'), (_, key, body) => (filled(c[key]) ? body : ''))
+      .replace(inner('unless'), (_, key, body) => (filled(c[key]) ? '' : body));
+  } while (s !== prev);
+  return s;
+};
 
 function render(html, data) {
   const ctx = { ...data, year: new Date().getFullYear() };

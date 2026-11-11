@@ -113,6 +113,12 @@ $$('[data-acc]').forEach((group) => {
       btn.setAttribute('aria-expanded', 'true');
     }
     preview.hide();
+    // ролик в закрытой строке не должен играть дальше
+    $$('video', group).forEach((v) => {
+      if (!v.closest('.acc').hasAttribute('data-open')) { v.pause(); return; }
+      // раскрыли по клику: запускаем без звука, чтобы сразу было видно, что это ролик (при «уменьшить движение» не трогаем)
+      if (!reduce && v.paused) { v.muted = true; v.play().catch(() => {}); }
+    });
     // у каждой услуги своя 3D-модель
     if (open && model && group.classList.contains('stack')) {
       const i = $$('.acc', group).indexOf(item);

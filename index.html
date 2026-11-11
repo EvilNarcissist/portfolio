@@ -104,12 +104,13 @@
               <span class="icon" aria-hidden="true"></span>
             </button></h3>
             <div class="panel" id="w{{n}}" role="region" aria-labelledby="b{{n}}"><div class="panel-in">
-              <div class="art a{{art}}" role="img" aria-label="Абстрактная иллюстрация проекта {{title}}"></div>
+              {{#if video}}<video class="art art-video" controls preload="none" playsinline poster="{{poster}}" aria-label="Промо-ролик проекта {{title}}"><source src="{{video}}" type="video/mp4"></video>{{/if}}
+              {{#unless video}}<div class="art a{{art}}" role="img" aria-label="Абстрактная иллюстрация проекта {{title}}"></div>{{/unless}}
               <dl class="work-dl">
                 <div><dt>Задача</dt><dd>{{task}}</dd></div>
                 <div><dt>Что сделал</dt><dd>{{did}}</dd></div>
                 <div><dt>Инструменты</dt><dd>{{tools}}</dd></div>
-                {{#if link}}<div><dt>Ссылка</dt><dd><a class="textlink" href="{{link}}" target="_blank" rel="noopener noreferrer">{{linkLabel}}</a></dd></div>{{/if}}
+                {{#if link}}<div><dt>Ссылки</dt><dd class="work-links"><a class="textlink" href="{{link}}" target="_blank" rel="noopener noreferrer">{{linkLabel}}</a>{{#if link2}}<a class="textlink" href="{{link2}}" target="_blank" rel="noopener noreferrer">{{linkLabel2}}</a>{{/if}}</dd></div>{{/if}}
               </dl>
             </div></div>
           </article>
@@ -188,7 +189,7 @@
 
   {{#if projects}}
   <div class="preview" id="preview" aria-hidden="true">
-    {{#each projects}}<div class="art a{{art}}"></div>{{/each}}
+    {{#each projects}}<div class="art a{{art}}"{{#if posterRel}} style="background:#000 center / cover no-repeat url({{posterRel}})"{{/if}}></div>{{/each}}
   </div>
   {{/if}}
 
