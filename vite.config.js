@@ -45,6 +45,8 @@ const loadContent = () => {
     // видео и постер лежат в public/media (путь /media/…) или по https-адресу
     for (const key of ['video', 'poster']) {
       if (p[key] && !/^(\/media\/[\w.-]+|https:\/\/)/.test(String(p[key]))) throw new Error(`content.json: «${key}» у проекта «${p.title}» должен быть вида /media/файл или https://…`);
+      // без самого файла Vite не поправит путь, и на адресе в подпапке (GitHub Pages) ролик не загрузится
+      if (p[key] && String(p[key]).startsWith('/media/') && !existsSync(resolve('public', String(p[key]).slice(1)))) throw new Error(`content.json: файла нет на диске: public${p[key]} (положите его в public/media/)`);
     }
     // для превью-картинки при наведении нужен путь без начального «/», чтобы он работал и в подпапке (GitHub Pages)
     p.posterRel = p.poster && p.poster.startsWith('/') ? p.poster.slice(1) : (p.poster || '');
